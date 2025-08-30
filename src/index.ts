@@ -14,7 +14,7 @@ export type workerInfo = {
 }
 
 const NAME = 'workerShare';
-const debug = true; // Triggers all WorkerShare classes and workers to log their communication 
+const debug = false; // Triggers all WorkerShare classes and workers to log their communication 
 
 export class WorkerShare {
     public data: Record<string | number, any>;
