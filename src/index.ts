@@ -14,11 +14,13 @@ export type workerInfo = {
 }
 
 const NAME = 'workerShare';
-const debug = false; // Triggers all WorkerShare classes and workers to log their communication 
+const debug = true; // Triggers all WorkerShare classes and workers to log their communication 
 
 export class WorkerShare {
     public data: Record<string | number, any>;
-    public workers: Worker[] = [];
+    private workerArr: (Worker | null)[] = [];
+    public workers: number = 0;
+    public onAllComplete: () => void = () => null;
     constructor(data: Record<string | number, any> = {}) {
         let workerShare = this;
         this.data = new Proxy(data, {
@@ -45,16 +47,17 @@ export class WorkerShare {
     }
 
     public messageAll(message: any) {
-        if (debug) console.log(`(Parent) Sending to ${this.workers.length} workers`, message)
-        this.workers.forEach((worker) => {
-            worker.postMessage(message)
+        if (debug) console.log(`(Parent) Sending to ${this.workers} workers`, message)
+        this.workerArr.forEach((worker) => {
+            worker?.postMessage(message)
         })
     }
 
     public hire(url: string | URL, workerData: workerInfo = {}) {
         if(debug) console.log(`(Parent): Hiring new worker from URL ${url} with`, workerData)
-        let id = this.workers.push(new Worker(url, { workerData: { input: workerData.input, workerShare: JSON.stringify(this.data) } })) - 1;
-        this.workers[id].on('message', (msg) => {
+        let worker = new Worker(url, { workerData: { input: workerData.input, workerShare: JSON.stringify(this.data) } });
+        let id = this.workerArr.push(worker);
+        worker.on('message', (msg) => {
             if (debug) console.log('(Parent) From child: ', msg)
             // Handle proxy communication
             if (typeof msg === 'object' && msg.sender == NAME) {
@@ -65,19 +68,23 @@ export class WorkerShare {
                 }
             } else if (workerData.onMessage) workerData.onMessage(msg);
         });
-        if (workerData.onError) this.workers[id].on('error', workerData.onError)
-        this.workers[id].on('exit', (code) => {
-            this.workers = this.workers.filter((v, i) => i != id);
-            if(debug) console.log(`Worker exited, worker length now ${this.workers.length}`)
+        if (workerData.onError) worker.on('error', workerData.onError)
+        worker.on('exit', (code) => {
+            this.workerArr[id] = null;
+            this.workers--;
+        if(debug) console.log(`Worker exited, worker length now ${this.workers}`)
+            if (this.workers == 0) this.onAllComplete()
             if (workerData.onComplete) workerData.onComplete(code)
         })
-        if (workerData.onMessageError) this.workers[id].on('messageerror', workerData.onMessageError)
+        if (workerData.onMessageError) worker.on('messageerror', workerData.onMessageError)
             
 
-        if (workerData.onOnline) this.workers[id].on('online',
+        if (workerData.onOnline) worker.on('online',
             workerData.onOnline
         );
-        return this.workers[id];
+
+        this.workers++;
+        return worker;
     }
 }
 

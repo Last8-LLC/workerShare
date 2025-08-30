@@ -1,15 +1,17 @@
 {
   "name": "workershare",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "license": "MIT",
   "scripts": {
     "build": "tsc",
-    "test": "npm run build && node ./dist/tests"
+    "test": "npm run build && node ./dist/tests",
+    "prepublishOnly": "npm i && npm run build"
   },
   "devDependencies": {
-    "ts-node": "^10.9.1",
-    "typescript": "^5.0.0"
-  }
+    "typescript": "^5.0.0",
+    "@types/node": "^24.3.0"
+  },
+  "dependencies": {}
 }

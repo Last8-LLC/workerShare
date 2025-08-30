@@ -24,7 +24,9 @@ Function called when the worker throws a message error.
 ### `WorkerShare.messageAll(message)`
 Posts a message to all workers.
 ### `WorkerShare.workers`
-An array of workers hired by the method.
+The current amount of workers employed by the class.
+## `WorkerShare.onAllComplete`
+A function that is executed when all workers have exited. The method takes in no arguments.
 
 ## `function receiveData(onMessageEvent): Record<string|number, any>`
 Function that should be called by the worker thread to process data. Returns the subscribed data. 
@@ -41,10 +43,10 @@ Note that only setting a property and deleting it will properly update the paren
 
 Additionally, as both workerData and the shared data are themselves objects, workerData.input and properties of the shared data cannot be object, it will throw an error. As well, messages sent between the parent and the worker with a `sender` property set to `workerShare` will be caught and treated as a data sync message. Message events passed into the worker through the receiveData function's onMessageEvent and WorkerData.hire's onMessage will not receive the message.
 
-Some workers will need their URL wrapped in `new URL()` when it is passed into WorkerShare.hire, namely file URLs such as `import.meta.url`.
+The function `WorkerShare.prototype.workers` can be set with a function of type `()=>void`. It will be ran when all workers have exited. 
 
 ## Contribution and License
-Contributions are appreciated. If you spot a bug or want another feature, create an issue.
+Contributions are appreciated. Any bugs should be reported as GitHub issues.
 
 If you are contributing or forking the software, note that the tests are not written as unit tests. To properly run the tests, change `debug` in the main file to true. 
 

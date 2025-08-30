@@ -10,8 +10,9 @@ function wait(time: number) {
 
 if (isMainThread) {
   console.log('Running tests...');
-  let workerShare = new WorkerShare({value: 4});
-  workerShare.hire(__filename, {input: 'Hello', onComplete(exitCode) { console.log(workerShare.workers.length, exitCode) }})
+  let workerShare = new WorkerShare();
+  workerShare.onAllComplete = () => console.log(`All Completed`);
+  let worker = workerShare.hire(__filename, {input: 'Hello', onComplete(exitCode) { console.log(workerShare.workers, exitCode) }})
 
   async function doStuff() {
     await wait(2);
@@ -19,8 +20,8 @@ if (isMainThread) {
     workerShare.data['Hi'] = 'England';
     workerShare.hire(__filename, {input: 'Bye', onMessage(value) {
       console.log('\x1b[35m (Parent): Received from Child:', value, '\x1b[0m');
-      workerShare.workers[0]?.postMessage(`Bye`)
-    },})
+      worker.postMessage("Bye!")
+    }})
   }
   doStuff()
 
