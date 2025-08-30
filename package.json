@@ -4,9 +4,11 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
-    "build": "tsc"
+    "build": "tsc",
+    "test": "npm run build && node ./dist/tests"
   },
   "devDependencies": {
+    "ts-node": "^10.9.1",
     "typescript": "^5.0.0"
   }
 }
