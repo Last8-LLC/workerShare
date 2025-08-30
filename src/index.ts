@@ -19,7 +19,7 @@ const debug = false; // Triggers all WorkerShare classes and workers to log thei
 export class WorkerShare {
     public data: Record<string | number, any>;
     public workers: Worker[] = [];
-    constructor(data: Record<string | number, any>) {
+    constructor(data: Record<string | number, any> = {}) {
         let workerShare = this;
         this.data = new Proxy(data, {
             set(target, property, value, receiver) {

@@ -6,13 +6,13 @@ Class to create workers and share data with them.
 ### `constructor(data: Record<string | number, any>)`
 Creates a workerShare class with the data object. Note the data object must be serializable, so it cannot contain objects within the object.
 ### `WorkerShare.data`
-A proxy of the orginal data that automatically notifies workers of updates. Should be used when the parent alters the data.
+A proxy of the original data that automatically notifies workers of updates. Should be used when the parent alters the data.
 ### `WorkerShare.hire(url: string | URL, workerData)`
 Creates a new worker at the url listed, subscribing it to the parent's data. Returns the worker.
 #### `workerData.input?`
 Input to be passed into the worker as worker-threads.workerData.input. Note that the value cannot be an Object. If you want to send an object, convert it into JSON and parse the JSON in the worker.
 #### `workerData.onMessage(message: any)?`
-Function called whenever a message is recieved from the worker that is not data sync.
+Function called whenever a message is received from the worker that is not data sync.
 #### `workerData.onError(error: Error)?`
 Function called when the worker errors.
 #### `workerData.onComplete(exitCode: number)?`
@@ -35,12 +35,13 @@ Function called whenever a message is received from the parent that is not data 
 `npm i workerShare`
 
 ## Using the package
-Import the class from `workershare` in your main thread, and import `receiveData` in your worker threads. When using the input data in a worker thread, note that it is located at workerData.input so that the inital value of the shared data can also be sent.
+Import the class from `workershare` in your main thread, and import `receiveData` in your worker threads. When using the input data in a worker thread, note that it is located at workerData.input so that the initial value of the shared data can also be sent.
 
 Note that only setting a property and deleting it will properly update the parent. `Object.defineProperty` and `Object.setPropertyOf` are not caught and transmitted to parent, and direct assignment to the object will unsubscribe the object.
 
-Additonally, as both workerData and the shared data are themselves objects, workerData.input and properties of the shared data cannot be object, it will throw an error. As well, messages sent between the parent and the worker with a `sender` property set to `workerShare` will be caught and treated as a data sync message. Message events passed into the worker through the recieveData function's onMessageEvent and WorkerData.hire's onMessage will not recieve the message.
+Additionally, as both workerData and the shared data are themselves objects, workerData.input and properties of the shared data cannot be object, it will throw an error. As well, messages sent between the parent and the worker with a `sender` property set to `workerShare` will be caught and treated as a data sync message. Message events passed into the worker through the receiveData function's onMessageEvent and WorkerData.hire's onMessage will not receive the message.
 
+Some workers will need their URL wrapped in `new URL()` when it is passed into WorkerShare.hire, namely file URLs such as `import.meta.url`.
 
 ## Contribution and License
 Contributions are appreciated. If you spot a bug or want another feature, create an issue.
