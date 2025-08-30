@@ -1,5 +1,5 @@
 {
-  "name": "my-ts-package",
+  "name": "workershare",
   "version": "1.0.0",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

@@ -6,15 +6,15 @@ import {
 
 export type workerInfo = {
     input?: any,
-    onMessage?: (value: any) => void,
-    onError?: (err: Error) => void,
+    onMessage?: (message: any) => void,
+    onError?: (error: Error) => void,
     onComplete?: (exitCode: number) => void,
-    onMessageError?: (exitCode: number) => void,
+    onMessageError?: (error: MessageEvent) => void,
     onOnline?: () => void
 }
 
 const NAME = 'workerShare';
-const debug = true; // Triggers all WorkerShare classes and workers to log their communication 
+const debug = false; // Triggers all WorkerShare classes and workers to log their communication 
 
 export class WorkerShare {
     public data: Record<string | number, any>;
@@ -72,6 +72,7 @@ export class WorkerShare {
             if (workerData.onComplete) workerData.onComplete(code)
         })
         if (workerData.onMessageError) this.workers[id].on('messageerror', workerData.onMessageError)
+            
 
         if (workerData.onOnline) this.workers[id].on('online',
             workerData.onOnline

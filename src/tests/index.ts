@@ -17,15 +17,19 @@ if (isMainThread) {
     await wait(2);
     console.log('\x1b[36m (Parent): ', workerShare.data, '\x1b[0m')
     workerShare.data['Hi'] = 'England';
-    workerShare.hire(__filename, {input: 'Bye'})
+    workerShare.hire(__filename, {input: 'Bye', onMessage(value) {
+      console.log('\x1b[35m (Parent): Received from Child:', value, '\x1b[0m');
+      workerShare.workers[0]?.postMessage(`Bye`)
+    },})
   }
   doStuff()
 
 } else {
-  let data = receiveData((message)=>console.log(message));
+  let data = receiveData((message) => console.log('\x1b[35m (Child) Received from Parent:', message, '\x1b[0m'));
   async function doStuff() {
     await wait(1);
     data[workerData.input] = 'America'
+    parentPort?.postMessage('Hi!')
     await wait(4);
     data[workerData.input] = 'France'
     // delete data[workerData.input];
