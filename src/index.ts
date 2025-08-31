@@ -4,23 +4,65 @@ import {
     workerData,
 } from 'worker_threads'
 
+/**
+ * Defines the configuration for a worker thread.
+ */
 export type workerInfo = {
+    /**
+     * Optional data to pass to the worker's `workerData.input`.
+     */
     input?: any,
+    /**
+     * An optional callback function that is called when the worker sends a message.
+     * @param message The message received from the worker.
+     */
     onMessage?: (message: any) => void,
+    /**
+     * An optional callback function that is called when an error occurs in the worker.
+     * @param error The error that occurred.
+     */
     onError?: (error: Error) => void,
+    /**
+     * An optional callback function that is called when the worker exits.
+     * @param exitCode The exit code of the worker.
+     */
     onComplete?: (exitCode: number) => void,
+    /**
+     * An optional callback function that is called when a message sent to the worker cannot be serialized.
+     * @param error The message event error.
+     */
     onMessageError?: (error: MessageEvent) => void,
+    /**
+     * An optional callback function that is called when the worker is online.
+     */
     onOnline?: () => void
 }
 
 const NAME = 'workerShare';
 const debug = false; // Triggers all WorkerShare classes and workers to log their communication 
 
+/**
+ * The `WorkerShare` class enables the sharing of data between the main thread and multiple worker threads.
+ * It uses a `Proxy` to automatically synchronize data changes across all threads.
+ */
 export class WorkerShare {
+    /**
+     * A proxy object that holds the shared data. Any changes to this object are automatically propagated to all worker threads.
+     */
     public data: Record<string | number, any>;
     private workerArr: (Worker | null)[] = [];
+    /**
+     * The current number of active worker threads.
+     */
     public workers: number = 0;
+    /**
+     * A callback function that is called when all worker threads have completed their execution.
+     */
     public onAllComplete: () => void = () => null;
+    /**
+     * Creates a new `WorkerShare` instance.
+     * @param data An optional object to initialize the shared data with.
+     */
     constructor(data: Record<string | number, any> = {}) {
         let workerShare = this;
         this.data = new Proxy(data, {
@@ -46,6 +88,10 @@ export class WorkerShare {
         })
     }
 
+    /**
+     * Sends a message to all active worker threads.
+     * @param message The message to send.
+     */
     public messageAll(message: any) {
         if (debug) console.log(`(Parent) Sending to ${this.workers} workers`, message)
         this.workerArr.forEach((worker) => {
@@ -53,6 +99,12 @@ export class WorkerShare {
         })
     }
 
+    /**
+     * Creates and starts a new worker thread.
+     * @param url The URL of the worker script.
+     * @param workerData The configuration for the new worker.
+     * @returns The newly created `Worker` instance.
+     */
     public hire(url: string | URL, workerData: workerInfo = {}) {
         if(debug) console.log(`(Parent): Hiring new worker from URL ${url} with`, workerData)
         let worker = new Worker(url, { workerData: { input: workerData.input, workerShare: JSON.stringify(this.data) } });
@@ -88,6 +140,11 @@ export class WorkerShare {
     }
 }
 
+/**
+ * This function is intended to be used within a worker thread. It sets up a proxy to synchronize data with the main thread.
+ * @param onMessageEvent An optional callback function that is called when the worker receives a message from the main thread.
+ * @returns A proxy object that represents the shared data.
+ */
 export function receiveData(onMessageEvent: (message: any) => void = () => null) {
     if(debug) console.log(`(Child) Initialized with`, workerData)
     const target: Record<string | number, any> = JSON.parse(workerData.workerShare) ?? {};
