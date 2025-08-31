@@ -10,8 +10,7 @@
     "prepublishOnly": "npm i && npm run build"
   },
   "devDependencies": {
-    "typescript": "^5.0.0",
-    "@types/node": "^24.3.0"
-  },
-  "dependencies": {}
+    "@types/node": "^24.3.0",
+    "typescript": "^5.0.0"
+  }
 }
